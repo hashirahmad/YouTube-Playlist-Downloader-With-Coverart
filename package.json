@@ -1,0 +1,20 @@
+{
+  "name": "youtube-playlist-url-extractor",
+  "version": "0.0.1",
+  "description": "Its an experimental app that can download mp3 files from youtube links with the cover art",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hashir Ahmad",
+  "license": "ISC",
+  "dependencies": {
+    "cli-progress": "^3.4.0",
+    "jsonfile": "^5.0.0",
+    "mv": "^2.1.1",
+    "prompt": "^1.0.0",
+    "puppeteer": "^2.0.0",
+    "read-text-file": "^1.1.0",
+    "yargs": "^15.0.2"
+  }
+}
