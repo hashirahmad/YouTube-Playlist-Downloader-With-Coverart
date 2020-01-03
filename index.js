@@ -131,10 +131,26 @@ async function run(i) {
             }
             FileNames[ i ].done = true
             await saveFileNamesJSON(FileNames)
-            await moveEachFileInOwnFolder(`${__dirname}/Media/${FileNames[i].name}`, FileNames[i])
-            console.log('\n\nAll done.\nClosing browser . . .')
-            await browser.close()
-            return
+
+            let q = `Press [ENTER] when all downloads are finished . . .`
+            prompt.get([q], async function (err, result) {
+
+                if (err) {
+                    return onErr(err)
+                }
+                
+                await moveEachFileInOwnFolder(`${__dirname}/Media/${FileNames[i].name}`, FileNames[i])
+                console.log('\n\nAll done.\nClosing browser . . .')
+                await browser.close()
+                return
+
+            })
+
+            function onErr(err) {
+                console.log(err)
+                return 1
+            }
+
     
         } else {
     
@@ -219,12 +235,9 @@ function mkdir( dir ) {
 
 }
 
-async function moveEachFileInOwnFolder(dir, obj){
+async function moveEachFileInOwnFolder(dir, obj){    
 
-    console.log('Waiting for 1.5 minutes for last download(s) to finish\n\n')
     let folderAcronym = nameToAcronym(obj.name)
-    
-    await sleep(60 * 1.5)
     await renameFiles(dir, folderAcronym)
     // createFolderForEachFile(obj, dir)
 }
@@ -255,14 +268,23 @@ async function renameFiles(dir, acronym) {
             if ( files[f].endsWith('.mp3') && files[f].startsWith(`(${acronym})`) === false ) {
 
                 let filePath = path.join(dir, files[f])
-                let newFilePath = path.join(dir, `(${acronym}) ${files[f]}`)
+
+                let acronimedName = acronym + ' '
+                acronimedName += files[f].replace(/[^\w\s\][^,]/gi, "")
+                acronimedName = acronimedName.replace('mp3', '')
+                acronimedName += '.mp3'
+
+                let folder = files[f].replace(/[^\w\s\][^,]/gi, "")
+                folder = folder.replace('mp3', '')
+
+                let newFilePath = path.join(dir, acronimedName)
                 try {
                     fs.renameSync(filePath, newFilePath)
                     console.log('Rename:', newFilePath)
-                    mkdir( path.join(dir, files[f].replace(/[^\w\s]mp3/gi, "")) )
+                    mkdir( path.join(dir, folder) )
                     mv(
                       newFilePath,
-                      path.join(dir, files[f].replace(/[^\w\s]mp3/gi, ""), `(${acronym}) ${files[f]}`),
+                      path.join(dir, folder, acronimedName),
                       e => {
                           if (e) {
                               console.error('Moved: Error happened while moving after renaming\n', e)
@@ -293,7 +315,7 @@ function createFolderForEachFile(obj, dir) {
 
     for ( let f in obj.stats ) {
         
-        let fsPath = path.join( filePath, obj.stats[f].name.replace(/[^\w\s]/gi, '') )
+        let fsPath = path.join(filePath, obj.stats[f].name.replace(/[^\w\s\][^,]/gi, ''))
         mkdir(fsPath)
         
     }
